@@ -16,7 +16,7 @@ class CustomDict:
         pass
 
     def remove_from_dict(self, flag, content):
-        if [flag, content] in self.custom_dict[self.hash_converter(flag)]:
+        if [flag, content] in self.custom_dict[self.hash_converter(flag)]:  #ここはO(N)
             self.custom_dict[self.hash_converter(flag)].remove([flag, content])
             print('successfully removed content for "{}" in c_dict'.format(flag))
         else:
