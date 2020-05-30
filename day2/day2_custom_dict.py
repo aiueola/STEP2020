@@ -9,26 +9,26 @@ class CustomDict:
 
     def add_to_dict(self, key, value):
         if [key, value] in self.custom_dict[self.hash_converter(key)]:
-            print('the content for "{}" has already existed in dict'.format(key))
+            print('the value for "{}" has already existed in dict'.format(key))
         else:
             self.custom_dict[self.hash_converter(key)].append([key, value])
-            print('successfully added content for "{}" in c_dict'.format(key))
+            print('successfully added value for "{}" in c_dict'.format(key))
         pass
 
     def remove_from_dict(self, key, value):
         if [key, value] in self.custom_dict[self.hash_converter(key)]:  #ここはO(N)
             self.custom_dict[self.hash_converter(key)].remove([key, value])
-            print('successfully removed content for "{}" in c_dict'.format(key))
+            print('successfully removed value for "{}" in c_dict'.format(key))
         else:
-            print('could not remove content for "{}" in dict, because "{}" did not exist in dict'.format(key, key))
+            print('could not remove value for "{}" in dict, because "{}" did not exist in dict'.format(key, key))
         pass
 
     def find_in_dict(self, key):
         for stored_in_dict in self.custom_dict[self.hash_converter(key)]:  #ここもO(N)
             if stored_in_dict[0] == key:
-               print('contents for "{}" found in c_dict, '.format(key), stored_in_dict[1])
+               print('value for "{}" found in c_dict, '.format(key), stored_in_dict[1])
                return
-        print('contents for "{}" did not exist in c_dict'.format(key))
+        print('value for "{}" did not exist in c_dict'.format(key))
         return
         pass
 
@@ -61,23 +61,23 @@ if __name__ == "__main__":
 
 ########################################################################
 #[[], [], [], []]
-#successfully added content for "a" in c_dict
+#successfully added value for "a" in c_dict
 #[[], [['a', 'A']], [], []]
-#successfully added content for "b" in c_dict
+#successfully added value for "b" in c_dict
 #[[], [['a', 'A']], [['b', 'B']], []]
-#successfully added content for "c" in c_dict
+#successfully added value for "c" in c_dict
 #[[], [['a', 'A']], [['b', 'B']], [['c', 'C']]]
-#successfully added content for "e" in c_dict
+#successfully added value for "e" in c_dict
 #[[], [['a', 'A'], ['e', 'E']], [['b', 'B']], [['c', 'C']]]
-#successfully added content for "i" in c_dict
+#successfully added value for "i" in c_dict
 #[[], [['a', 'A'], ['e', 'E'], ['i', 'I']], [['b', 'B']], [['c', 'C']]]
-#successfully removed content for "e" in c_dict
+#successfully removed value for "e" in c_dict
 #[[], [['a', 'A'], ['i', 'I']], [['b', 'B']], [['c', 'C']]]
-#successfully removed content for "b" in c_dict
+#successfully removed value for "b" in c_dict
 #[[], [['a', 'A'], ['i', 'I']], [], [['c', 'C']]]
-#could not remove content for "d" in dict, because "d" did not exist in dict
+#could not remove value for "d" in dict, because "d" did not exist in dict
 #[[], [['a', 'A'], ['i', 'I']], [], [['c', 'C']]]
-#contents for "a" found in c_dict,  A
-#contents for "e" did not exist in c_dict
-#contents for "z" did not exist in c_dict
+#value for "a" found in c_dict,  A
+#value for "e" did not exist in c_dict
+#value for "z" did not exist in c_dict
 #OK!
