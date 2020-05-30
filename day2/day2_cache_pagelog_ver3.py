@@ -24,7 +24,7 @@ def process(cache, flag, url, contents, length, x):
             flag[0] = cache[flag[0]][2]
             cache[flag[0]][1] = 0 #一番最初になったら0に初期化
         #cacheの末尾だった場合も，場合分けが必要(なにもしない)
-        elif self.preserved[url][2] == 0:
+        elif cache[url][2] == 0:
             return length, found_contents
         else:
             before = cache[url][1]
