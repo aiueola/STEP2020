@@ -1,6 +1,6 @@
 def process(cache, url, contents, length, x):
     #データ構造は辞書に紐づけて，cache[url] = [contents, ひとつ前に閲覧したurl，ひとつ後に閲覧したurl]の順で保持
-    #また，一番古い閲覧履歴と一番新しい閲覧履歴を，flag = [一番古い閲覧url, 一番新しい閲覧url]として保持
+    #また，一番古い閲覧履歴と一番新しい閲覧履歴を，head = 一番古い閲覧url, tail = 一番新しい閲覧urlとして保持
     global head
     global tail
     found_contents = None
