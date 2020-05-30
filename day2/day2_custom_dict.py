@@ -4,31 +4,31 @@ class CustomDict:
         self.custom_dict = [[] for i in range(self.n)]
         pass
 
-    def hash_converter(self, flag):
-        return ord(str(flag)[0])%self.n  #今回はごく簡単なhash関数
+    def hash_converter(self, key):
+        return ord(str(key)[0])%self.n  #今回はごく簡単なhash関数
 
-    def add_to_dict(self, flag, content):
-        if [flag, content] in self.custom_dict[self.hash_converter(flag)]:
-            print('the content for "{}" has already existed in dict'.format(flag))
+    def add_to_dict(self, key, content):
+        if [key, content] in self.custom_dict[self.hash_converter(key)]:
+            print('the content for "{}" has already existed in dict'.format(key))
         else:
-            self.custom_dict[self.hash_converter(flag)].append([flag, content])
-            print('successfully added content for "{}" in c_dict'.format(flag))
+            self.custom_dict[self.hash_converter(key)].append([key, content])
+            print('successfully added content for "{}" in c_dict'.format(key))
         pass
 
-    def remove_from_dict(self, flag, content):
-        if [flag, content] in self.custom_dict[self.hash_converter(flag)]:  #ここはO(N)
-            self.custom_dict[self.hash_converter(flag)].remove([flag, content])
-            print('successfully removed content for "{}" in c_dict'.format(flag))
+    def remove_from_dict(self, key, content):
+        if [key, content] in self.custom_dict[self.hash_converter(key)]:  #ここはO(N)
+            self.custom_dict[self.hash_converter(key)].remove([key, content])
+            print('successfully removed content for "{}" in c_dict'.format(key))
         else:
-            print('could not remove content for "{}" in dict, because "{}" did not exist in dict'.format(flag, flag))
+            print('could not remove content for "{}" in dict, because "{}" did not exist in dict'.format(key, key))
         pass
 
-    def find_in_dict(self, flag):
-        for stored_in_dict in self.custom_dict[self.hash_converter(flag)]:  #ここもO(N)
-            if stored_in_dict[0] == flag:
-               print('contents for "{}" found in c_dict, '.format(flag), stored_in_dict[1])
+    def find_in_dict(self, key):
+        for stored_in_dict in self.custom_dict[self.hash_converter(key)]:  #ここもO(N)
+            if stored_in_dict[0] == key:
+               print('contents for "{}" found in c_dict, '.format(key), stored_in_dict[1])
                return
-        print('contents for "{}" did not exist in c_dict'.format(flag))
+        print('contents for "{}" did not exist in c_dict'.format(key))
         return
         pass
 
