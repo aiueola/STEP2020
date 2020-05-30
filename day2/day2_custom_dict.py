@@ -7,17 +7,17 @@ class CustomDict:
     def hash_converter(self, key):
         return ord(str(key)[0])%self.n  #今回はごく簡単なhash関数
 
-    def add_to_dict(self, key, content):
-        if [key, content] in self.custom_dict[self.hash_converter(key)]:
+    def add_to_dict(self, key, value):
+        if [key, value] in self.custom_dict[self.hash_converter(key)]:
             print('the content for "{}" has already existed in dict'.format(key))
         else:
-            self.custom_dict[self.hash_converter(key)].append([key, content])
+            self.custom_dict[self.hash_converter(key)].append([key, value])
             print('successfully added content for "{}" in c_dict'.format(key))
         pass
 
-    def remove_from_dict(self, key, content):
-        if [key, content] in self.custom_dict[self.hash_converter(key)]:  #ここはO(N)
-            self.custom_dict[self.hash_converter(key)].remove([key, content])
+    def remove_from_dict(self, key, value):
+        if [key, value] in self.custom_dict[self.hash_converter(key)]:  #ここはO(N)
+            self.custom_dict[self.hash_converter(key)].remove([key, value])
             print('successfully removed content for "{}" in c_dict'.format(key))
         else:
             print('could not remove content for "{}" in dict, because "{}" did not exist in dict'.format(key, key))
