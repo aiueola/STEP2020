@@ -48,7 +48,7 @@ def tokenize(line):
       elif line[index] in ['(', ')']:
           (token, index) = readBracket(line, index)
       else:
-          print('Invalid character found: ' + line[index])
+          print('error: invalid character found: ' + line[index])
           sys.exit(1)
       tokens.append(token)
   return tokens
@@ -118,7 +118,7 @@ def evaluate_multiple(tokens, index):
 #徐算記号前後の数字を掛け合わせる
 def evaluate_div(tokens, index):
     if tokens[index+1]['number'] == 0:
-        print('warning: division by 0')
+        print('error: division by 0')
         sys.exit(1)
     result = tokens[index-1]['number'] / tokens[index+1]['number']
     tokens.insert(index-1, {'type': 'NUMBER', 'number': result})
@@ -181,7 +181,7 @@ def evaluate(tokens):
 def test(line):
     tokens = tokenize(line)
     if not check_syntax(tokens):
-        print('Invalid syntax')
+        print('error: invalid syntax')
         sys.exit(1)
     actualAnswer = evaluate(tokens)
     expectedAnswer = eval(line)
