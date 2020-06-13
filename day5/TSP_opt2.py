@@ -37,6 +37,7 @@ def solve(cities):
     print('greedy done!', greedy-start)
     
     #opt-2 (needed several times, especially in case 6, iteration reached times, took mins to calc)
+    #I don't know but maybe this process would be less costly if you could use some heuristics to find crossing edges.
     iteration = 0
     updated = True
     while updated:
