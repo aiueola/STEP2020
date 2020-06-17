@@ -65,7 +65,6 @@ def solve(cities):
     return tour
 
 if __name__ == '__main__':
-    #run this file like this: python TSP_opt.py 2 #(<=the number would indicate which case you solve)
     assert len(sys.argv) > 1
     start = time.time()
     tour = solve(read_input('input_{}.csv'.format(sys.argv[1])))
