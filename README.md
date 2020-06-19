@@ -5,4 +5,5 @@ day1 - anagram
 day2 - tree, hash, cache  
 day3 - calculater  
 day4 - graph, DFS, BFS, Dijkstra, PageRank  
-day5 - P/NP, Traveling Salesman Problem
+day5 - P/NP, Traveling Salesman Problem  
+day6 - memory, malloc  
