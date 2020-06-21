@@ -341,7 +341,7 @@ void my_initialize() {
 void* my_malloc(size_t size) {
   my_metadata_t* metadata = my_heap.free_head;
   my_metadata_t* prevdata = NULL;
-  // check if there are enough free slot size
+  // Check if there are enough free slot size.
   while (metadata && metadata->size < size) {
     prevdata = metadata;
     metadata = metadata->next;
@@ -367,9 +367,8 @@ void* my_malloc(size_t size) {
     return my_malloc(size);
   }
 
-  //custom setting
-  // now, the first free slot is found and preserved as metadata
-  // try to find minimum region to fit a new object
+  // Now, the first free slot is found and preserved as metadata.
+  // Try to find minimum region to fit a new object.
   my_metadata_t* mini = metadata;
   size_t mini_size = metadata->size;
   while (metadata->next){
