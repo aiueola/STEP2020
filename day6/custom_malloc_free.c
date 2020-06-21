@@ -1,5 +1,15 @@
-// IN PROGRESS
-// raised Segmentation fault (core dumped)
+// WORK IN PROGRESS
+// It just barely worked (there were no error raised), but the result was awful.
+// Interupted Challenge3 because of too long run time.
+// ==================================
+// Challenge 1: simple malloc => my malloc
+// Time: 653 ms => 790 ms
+// Utilization: 70% => 4%
+// ==================================
+// Challenge 2: simple malloc => my malloc
+// Time: 609 ms => 716 ms
+// Utilization: 40% => 2%
+// ==================================
 
 ////////////////////////////////////////////////////////////////////////////////
 /*                 (๑＞◡＜๑)  Malloc Challenge!!  (◍＞◡＜◍)                   */
@@ -313,8 +323,10 @@ void my_initialize() {
 // munmap_to_system.
 void* my_malloc(size_t size) {
   my_metadata_t* metadata = my_heap.free_head;
+  my_metadata_t* prevdata = NULL;
   // check if there are enough free slot size
   while (metadata && metadata->size < size) {
+    prevdata = metadata;
     metadata = metadata->next;
   }
 
@@ -328,13 +340,14 @@ void* my_malloc(size_t size) {
     //     <---------------------->
     //            buffer_size
     size_t buffer_size = 4096;
-    simple_metadata_t* metadata = (simple_metadata_t*)mmap_from_system(buffer_size);
-    metadata->size = buffer_size - sizeof(simple_metadata_t);
+    my_metadata_t* metadata = (my_metadata_t*)mmap_from_system(buffer_size);
+    metadata->size = buffer_size - sizeof(my_metadata_t);
     metadata->next = NULL;
+    metadata->prev = prevdata;
     // Add the memory region to the free list.
-    simple_add_to_free_list(metadata);
-    // Now, try simple_malloc() again. This should succeed.
-    return simple_malloc(size);
+    my_add_to_free_list(metadata);
+    // Now, try my_malloc() again. This should succeed.
+    return my_malloc(size);
   }
 
   //custom setting
@@ -373,10 +386,10 @@ void* my_malloc(size_t size) {
     new_metadata->size = remaining_size - sizeof(my_metadata_t);
     new_metadata->next = mini->next;
     new_metadata->prev = mini->prev;
-    mini->next = NULL;
-    mini->prev = NULL;
     // Add the remaining free slot to the free list.
     my_add_to_free_list(new_metadata);
+    mini->next = NULL;
+    mini->prev = NULL;
   }
   return ptr;
 }
