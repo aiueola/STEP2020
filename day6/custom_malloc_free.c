@@ -105,7 +105,6 @@ typedef struct simple_metadata_t {
   struct simple_metadata_t* next;
 } simple_metadata_t;
 
-// custom ver
 // add prev information in order to make free_list bidirectional
 typedef struct my_metadata_t {
   size_t size;
@@ -124,7 +123,6 @@ typedef struct simple_heap_t {
 
 simple_heap_t simple_heap;
 
-// custom setting
 // add tail information to heap in order to implement my_add_to_tail_of_free_list()
 typedef struct my_heap_t {
   my_metadata_t* free_head;
@@ -141,7 +139,6 @@ void simple_add_to_free_list(simple_metadata_t* metadata) {
   simple_heap.free_head = metadata;
 }
 
-// custom setting
 // four version to add a free slot
 // add first free slot
 void my_add_first_free_list(my_metadata_t* metadata) {
@@ -307,7 +304,6 @@ void simple_free(void* ptr) {
 
 // This is called only once at the beginning of each challenge.
 void my_initialize() {
-  // custom setting
   size_t buffer_size = 4096;
   my_metadata_t* metadata = (my_metadata_t*)mmap_from_system(buffer_size);
   metadata->size = buffer_size - sizeof(my_metadata_t);
@@ -350,7 +346,6 @@ void* my_malloc(size_t size) {
     return my_malloc(size);
   }
 
-  //custom setting
   // now, the first free slot is found and preserved as metadata
   // try to find minimum region to fit a new object
   my_metadata_t* mini = metadata;
