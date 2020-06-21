@@ -105,14 +105,6 @@ typedef struct simple_metadata_t {
   struct simple_metadata_t* next;
 } simple_metadata_t;
 
-// custom ver
-// add prev information in order to make free_list bidirectional
-typedef struct my_metadata_t {
-  size_t size;
-  struct my_metadata_t* next;
-  struct my_metadata_t* prev;
-} my_metadata_t;
-
 // The global information of the simple malloc.
 //   *  |free_head| points to the first free slot.
 //   *  |dummy| is a dummy free slot (only used to make the free list
@@ -124,63 +116,11 @@ typedef struct simple_heap_t {
 
 simple_heap_t simple_heap;
 
-// custom setting
-// add tail information to heap in order to implement my_add_to_tail_of_free_list()
-typedef struct my_heap_t {
-  my_metadata_t* free_head;
-  my_metadata_t* free_tail;
-  my_metadata_t dummy;
-} my_heap_t;
-
-my_heap_t my_heap;
-
 // Add a free slot to the beginning of the free list.
 void simple_add_to_free_list(simple_metadata_t* metadata) {
   assert(!metadata->next);
   metadata->next = simple_heap.free_head;
   simple_heap.free_head = metadata;
-}
-
-// custom setting
-// four version to add a free slot
-// add first free slot
-void my_add_first_free_list(my_metadata_t* metadata) {
-  my_heap.free_head = metadata;
-  my_heap.free_tail = metadata;
-}
-// add to head
-void my_add_to_head_of_free_list(my_metadata_t* metadata) {
-  my_metadata_t* current_head = my_heap.free_head;
-  current_head->prev = metadata;
-  my_heap.free_head = metadata;
-}
-// add to tail
-void my_add_to_tail_of_free_list(my_metadata_t* metadata) {
-  my_metadata_t* current_tail = my_heap.free_tail;
-  current_tail->next = metadata;
-  my_heap.free_tail = metadata;
-}
-// insertion
-void my_add_to_middle_of_free_list(my_metadata_t* metadata) {
-  my_metadata_t* current_prev = metadata->prev;
-  my_metadata_t* current_next = metadata->next;
-  current_prev->next = metadata;
-  current_next->prev = metadata;
-}
-// call each version of add_to_free_list() depend on condition
-void my_add_to_free_list(my_metadata_t* metadata) {
-    if (!metadata->prev && !metadata->next) {
-        my_add_first_free_list(metadata);
-    }
-    else if (!metadata->prev) {
-        my_add_to_head_of_free_list(metadata);
-    }
-    else if (!metadata->next) {
-        my_add_to_tail_of_free_list(metadata);
-    }
-    else {
-        my_add_to_middle_of_free_list(metadata);
-    }
 }
 
 // Remove a free slot from the free list.
@@ -192,30 +132,6 @@ void simple_remove_from_free_list(simple_metadata_t* metadata,
     simple_heap.free_head = metadata->next;
   }
   metadata->next = NULL;
-}
-
-// custom version for removing (just changed from simple_heap to my_heap)
-void my_remove_from_free_list(my_metadata_t* metadata) {
-  if (!metadata->prev && !metadata->next) {
-        my_heap.free_head = NULL;
-        my_heap.free_tail = NULL;
-    }
-    else if (!metadata->prev) {
-        my_metadata_t* current_next = metadata->next;
-        current_next->prev = NULL;
-        my_heap.free_head = current_next;
-    }
-    else if (!metadata->next) {
-        my_metadata_t* current_prev = metadata->prev;
-        current_prev->next = NULL;
-        my_heap.free_tail = current_prev;
-    }
-    else {
-        my_metadata_t* current_next = metadata->next;
-        my_metadata_t* current_prev = metadata->prev;
-        current_next->prev = current_next;
-        current_prev->next = current_prev;
-    }
 }
 
 // This is called only once at the beginning of each challenge.
@@ -305,9 +221,110 @@ void simple_free(void* ptr) {
 //
 // Your job is to invent a smarter malloc algorithm here :)
 
+// Each object or free slot has metadata just prior to it:
+//
+// ... | m | object | m | free slot | m | free slot | m | object | ...
+//
+// where |m| indicates metadata. The metadata is needed for two purposes:
+//
+// 1) For an allocated object:
+//   *  |size| indicates the size of the object. |size| does not include
+//      the size of the metadata.
+//   *  |next| and |prev| are unused and set to NULL.
+// 2) For a free slot:
+//   *  |size| indicates the size of the free slot. |size| does not include
+//      the size of the metadata.
+//   *  The free slots are linked with a singly linked list (we call this a
+//      free list). |next| points to the next free slot and |prev| points 
+//      to the previous one. <= Added |prev| in order to make free list
+//      bidirectional.
+typedef struct my_metadata_t {
+  size_t size;
+  struct my_metadata_t* next;
+  struct my_metadata_t* prev;
+} my_metadata_t;
+
+// The global information of the simple malloc.
+//   *  |free_head| points to the first free slot.
+//   *  |free_tail| points to the last free slot.
+//   *  |dummy| is a dummy free slot (only used to make the free list
+//      implementation simpler).
+typedef struct my_heap_t {
+  my_metadata_t* free_head;
+  my_metadata_t* free_tail;
+  my_metadata_t dummy; // ?
+} my_heap_t;
+
+my_heap_t my_heap;
+
+// Add a free slot to the free list.
+// There are four cases.
+// (1) Add first free slot.
+void my_add_first_free_list(my_metadata_t* metadata) {
+  my_heap.free_head = metadata;
+  my_heap.free_tail = metadata;
+}
+// (2) Add to head.
+void my_add_to_head_of_free_list(my_metadata_t* metadata) {
+  my_metadata_t* current_head = my_heap.free_head;
+  current_head->prev = metadata;
+  my_heap.free_head = metadata;
+}
+// (3) Add to tail.
+void my_add_to_tail_of_free_list(my_metadata_t* metadata) {
+  my_metadata_t* current_tail = my_heap.free_tail;
+  current_tail->next = metadata;
+  my_heap.free_tail = metadata;
+}
+// (4) Insert.
+void my_add_to_middle_of_free_list(my_metadata_t* metadata) {
+  my_metadata_t* current_prev = metadata->prev;
+  my_metadata_t* current_next = metadata->next;
+  current_prev->next = metadata;
+  current_next->prev = metadata;
+}
+// Call each version of add_to_free_list() depending on conditions.
+void my_add_to_free_list(my_metadata_t* metadata) {
+    if (!metadata->prev && !metadata->next) {
+        my_add_first_free_list(metadata);
+    }
+    else if (!metadata->prev) {
+        my_add_to_head_of_free_list(metadata);
+    }
+    else if (!metadata->next) {
+        my_add_to_tail_of_free_list(metadata);
+    }
+    else {
+        my_add_to_middle_of_free_list(metadata);
+    }
+}
+
+// Remove a free slot from the free list depending on conditions.
+void my_remove_from_free_list(my_metadata_t* metadata) {
+  if (!metadata->prev && !metadata->next) {
+        my_heap.free_head = NULL;
+        my_heap.free_tail = NULL;
+    }
+    else if (!metadata->prev) {
+        my_metadata_t* current_next = metadata->next;
+        current_next->prev = NULL;
+        my_heap.free_head = current_next;
+    }
+    else if (!metadata->next) {
+        my_metadata_t* current_prev = metadata->prev;
+        current_prev->next = NULL;
+        my_heap.free_tail = current_prev;
+    }
+    else {
+        my_metadata_t* current_next = metadata->next;
+        my_metadata_t* current_prev = metadata->prev;
+        current_next->prev = current_next;
+        current_prev->next = current_prev;
+    }
+}
+
 // This is called only once at the beginning of each challenge.
 void my_initialize() {
-  // custom setting
   size_t buffer_size = 4096;
   my_metadata_t* metadata = (my_metadata_t*)mmap_from_system(buffer_size);
   metadata->size = buffer_size - sizeof(my_metadata_t);
@@ -403,7 +420,8 @@ void my_free(void* ptr) {
   //     ^          ^
   //     metadata   ptr
   my_metadata_t* metadata = (my_metadata_t*)ptr - 1;
-  // how to find next/prev nodes..?
+  // Awful result may caused by this part..?
+  // In order to concate free slots, how to find next/prev nodes..?
   // metadata->next = 
   // metadata->prev = 
   // Add the free slot to the free list.
