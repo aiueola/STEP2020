@@ -386,7 +386,7 @@ void* my_find_prev_free_slot(my_metadata_t* metadata) {
 }
 
 // Concat two or three neighboring free slots when calling my_free()
-void* my_my_concat_free_slots(my_metadata_t* prev_, my_metadata_t* metadata, my_metadata_t* next_) {
+void* my_concat_free_slots(my_metadata_t* prev_, my_metadata_t* metadata, my_metadata_t* next_) {
     my_metadata_t* new_metadata;
     if (!prev_) {
         new_metadata = metadata;
