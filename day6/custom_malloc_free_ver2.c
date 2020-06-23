@@ -246,9 +246,9 @@ void* my_malloc(size_t size) {
   }
 
   simple_metadata_t* mini = metadata;
-  simple_metadata_t* mini_prev = metadata->prev;
+  simple_metadata_t* mini_prev = prev;
   size_t mini_size = metadata->size;
-  while (metadata->next){
+  while (metadata->next) {
     prev = metadata;
     metadata = metadata->next;
     if (metadata->size > size && metadata->size < mini_size) {
