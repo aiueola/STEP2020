@@ -378,7 +378,7 @@ void* my_find_next_free_slot(my_metadata_t* metadata) {
 void* my_find_prev_free_slot(my_metadata_t* metadata) {
     my_metadata_t* current_prev = metadata->slot_prev;
     while (current_prev) {
-        if (current_next->free_prev || current_prev == my_heap.free_head) {
+        if (current_prev->free_prev || current_prev == my_heap.free_head) {
             return current_prev;
         }
     }
@@ -525,13 +525,13 @@ void my_free(void* ptr) {
   }
 
   // Check if neighboring slot is next/prev free slot. 
-  bool next_isfree = false;
-  bool prev_isfree = false;
+  int next_isfree = 0; // means false
+  int prev_isfree = 0;
   if (next_free_slot && next_free_slot == metadata->slot_next) {
-      next_isfree = true;
+      next_isfree = 1; // means true
   }
   if (prev_free_slot && prev_free_slot == metadata->slot_prev) {
-      prev_isfree = true;
+      prev_isfree = 1;
   }
 
   // Concat free slots and remove old free slots
