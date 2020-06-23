@@ -1,7 +1,5 @@
 // WORK IN PROGRESS
-// Assertion error; An allocated object is broken!
-// At line 795 (785-798), "Free objects that are expected to be freed in this epoch."
-// 
+// Actually, this works awfully.
 
 ////////////////////////////////////////////////////////////////////////////////
 /*                 (๑＞◡＜๑)  Malloc Challenge!!  (◍＞◡＜◍)                   */
