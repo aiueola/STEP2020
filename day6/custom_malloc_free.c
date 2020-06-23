@@ -568,6 +568,7 @@ void my_free(void* ptr) {
       metadata->free_next = next_free_slot;
       metadata->free_prev = prev_free_slot;
   }
+  
   // Add the (free) slot to the (free) list.
   my_add_to_free_list(metadata);
   my_add_to_slot_list(metadata);
