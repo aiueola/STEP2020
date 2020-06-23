@@ -281,6 +281,7 @@ void my_add_to_free_list(my_metadata_t* metadata) {
         current_next->free_prev = metadata;
     }
 }
+
 // Add a slot to the slot list.
 // There are four cases.
 void my_add_to_slot_list(my_metadata_t* metadata) {
@@ -310,7 +311,8 @@ void my_add_to_slot_list(my_metadata_t* metadata) {
     }
 }
 
-// Remove a free slot from the free list depending on conditions.
+// Remove a free slot from the free list.
+// There are four cases.
 void my_remove_from_free_list(my_metadata_t* metadata) {
   if (!metadata->free_prev && !metadata->free_next) {
         my_heap.free_head = NULL;
@@ -333,7 +335,9 @@ void my_remove_from_free_list(my_metadata_t* metadata) {
         current_prev->free_next = current_prev;
     }
 }
-// Remove a slot from the slot list depending on conditions.
+
+// Remove a slot from the slot list.
+// There are four cases.
 void my_remove_from_slot_list(my_metadata_t* metadata) {
   if (!metadata->slot_prev && !metadata->slot_next) {
         my_heap.slot_head = NULL;
@@ -568,6 +572,8 @@ void my_free(void* ptr) {
   my_add_to_free_list(metadata);
   my_add_to_slot_list(metadata);
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 //
