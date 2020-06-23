@@ -1,15 +1,4 @@
 // WORK IN PROGRESS
-// It just barely worked (there were no error raised), but the result was awful.
-// Interupted Challenge3 because of too long run time.
-// ==================================
-// Challenge 1: simple malloc => my malloc
-// Time: 653 ms => 790 ms
-// Utilization: 70% => 4%
-// ==================================
-// Challenge 2: simple malloc => my malloc
-// Time: 609 ms => 716 ms
-// Utilization: 40% => 2%
-// ==================================
 
 ////////////////////////////////////////////////////////////////////////////////
 /*                 (๑＞◡＜๑)  Malloc Challenge!!  (◍＞◡＜◍)                   */
@@ -221,6 +210,8 @@ void simple_free(void* ptr) {
 //
 // Your job is to invent a smarter malloc algorithm here :)
 
+///////////////////// PREPARATION //////////////////////////
+
 // Each object or free slot has metadata just prior to it:
 //
 // ... | m | object | m | free slot | m | free slot | m | object | ...
@@ -230,108 +221,200 @@ void simple_free(void* ptr) {
 // 1) For an allocated object:
 //   *  |size| indicates the size of the object. |size| does not include
 //      the size of the metadata.
-//   *  |next| and |prev| are unused and set to NULL.
+//   *  The slots are linked with a singly linked list (we call this a
+//      slot list). |slot_next| points to the next slot and |slot_prev| points 
+//      to the previous one. 
+//   *  |free_next| and |free_prev| are unused and set to NULL.
 // 2) For a free slot:
 //   *  |size| indicates the size of the free slot. |size| does not include
 //      the size of the metadata.
 //   *  The free slots are linked with a singly linked list (we call this a
-//      free list). |next| points to the next free slot and |prev| points 
-//      to the previous one. <= Added |prev| in order to make free list
-//      bidirectional.
+//      slot/free list). |slot/free_next| points to the next (free) slot and
+//      |slot/ free_prev| points to the previous one.
 typedef struct my_metadata_t {
   size_t size;
-  struct my_metadata_t* next;
-  struct my_metadata_t* prev;
+  struct my_metadata_t* free_next;
+  struct my_metadata_t* free_prev;
+  struct my_metadata_t* slot_next;
+  struct my_metadata_t* slot_prev;
 } my_metadata_t;
 
 // The global information of the simple malloc.
-//   *  |free_head| points to the first free slot.
-//   *  |free_tail| points to the last free slot.
+//   *  |slot/free_head| points to the first (free) slot.
+//   *  |slot/free_tail| points to the last (free) slot.
 //   *  |dummy| is a dummy free slot (only used to make the free list
 //      implementation simpler).
 typedef struct my_heap_t {
   my_metadata_t* free_head;
   my_metadata_t* free_tail;
-  my_metadata_t dummy; // ?
+  my_metadata_t* slot_head;
+  my_metadata_t* slot_tail;
 } my_heap_t;
 
 my_heap_t my_heap;
 
 // Add a free slot to the free list.
 // There are four cases.
-// (1) Add first free slot.
-void my_add_first_free_list(my_metadata_t* metadata) {
-  my_heap.free_head = metadata;
-  my_heap.free_tail = metadata;
-}
-// (2) Add to head.
-void my_add_to_head_of_free_list(my_metadata_t* metadata) {
-  my_metadata_t* current_head = my_heap.free_head;
-  current_head->prev = metadata;
-  my_heap.free_head = metadata;
-}
-// (3) Add to tail.
-void my_add_to_tail_of_free_list(my_metadata_t* metadata) {
-  my_metadata_t* current_tail = my_heap.free_tail;
-  current_tail->next = metadata;
-  my_heap.free_tail = metadata;
-}
-// (4) Insert.
-void my_add_to_middle_of_free_list(my_metadata_t* metadata) {
-  my_metadata_t* current_prev = metadata->prev;
-  my_metadata_t* current_next = metadata->next;
-  current_prev->next = metadata;
-  current_next->prev = metadata;
-}
-// Call each version of add_to_free_list() depending on conditions.
 void my_add_to_free_list(my_metadata_t* metadata) {
-    if (!metadata->prev && !metadata->next) {
-        my_add_first_free_list(metadata);
+    // (1) Add first free slot.
+    if (!metadata->free_prev && !metadata->free_next) {
+        my_heap.free_head = metadata;
+        my_heap.free_tail = metadata;
     }
-    else if (!metadata->prev) {
-        my_add_to_head_of_free_list(metadata);
+    // (2) Add to head.
+    else if (!metadata->free_prev) {
+        my_metadata_t* current_head = my_heap.free_head;
+        current_head->free_prev = metadata;
+        my_heap.free_head = metadata;
     }
-    else if (!metadata->next) {
-        my_add_to_tail_of_free_list(metadata);
+    // (3) Add to tail.
+    else if (!metadata->free_next) {
+        my_metadata_t* current_tail = my_heap.free_tail;
+        current_tail->free_next = metadata;
+        my_heap.free_tail = metadata;
     }
+    // (4) Insert.
     else {
-        my_add_to_middle_of_free_list(metadata);
+        my_metadata_t* current_prev = metadata->free_prev;
+        my_metadata_t* current_next = metadata->free_next;
+        current_prev->free_next = metadata;
+        current_next->free_prev = metadata;
+    }
+}
+// Add a slot to the slot list.
+// There are four cases.
+void my_add_to_slot_list(my_metadata_t* metadata) {
+    // (1) Add first free slot.
+    if (!metadata->slot_prev && !metadata->slot_next) {
+        my_heap.slot_head = metadata;
+        my_heap.slot_tail = metadata;
+    }
+    // (2) Add to head.
+    else if (!metadata->slot_prev) {
+        my_metadata_t* current_head = my_heap.slot_head;
+        current_head->slot_prev = metadata;
+        my_heap.slot_head = metadata;
+    }
+    // (3) Add to tail.
+    else if (!metadata->slot_next) {
+        my_metadata_t* current_tail = my_heap.slot_tail;
+        current_tail->slot_next = metadata;
+        my_heap.slot_tail = metadata;
+    }
+    // (4) Insert.
+    else {
+        my_metadata_t* current_prev = metadata->slot_prev;
+        my_metadata_t* current_next = metadata->slot_next;
+        current_prev->slot_next = metadata;
+        current_next->slot_prev = metadata;
     }
 }
 
 // Remove a free slot from the free list depending on conditions.
 void my_remove_from_free_list(my_metadata_t* metadata) {
-  if (!metadata->prev && !metadata->next) {
+  if (!metadata->free_prev && !metadata->free_next) {
         my_heap.free_head = NULL;
         my_heap.free_tail = NULL;
     }
-    else if (!metadata->prev) {
-        my_metadata_t* current_next = metadata->next;
-        current_next->prev = NULL;
+    else if (!metadata->free_prev) {
+        my_metadata_t* current_next = metadata->free_next;
+        current_next->free_prev = NULL;
         my_heap.free_head = current_next;
     }
-    else if (!metadata->next) {
-        my_metadata_t* current_prev = metadata->prev;
-        current_prev->next = NULL;
+    else if (!metadata->free_next) {
+        my_metadata_t* current_prev = metadata->free_prev;
+        current_prev->free_next = NULL;
         my_heap.free_tail = current_prev;
     }
     else {
-        my_metadata_t* current_next = metadata->next;
-        my_metadata_t* current_prev = metadata->prev;
-        current_next->prev = current_next;
-        current_prev->next = current_prev;
+        my_metadata_t* current_next = metadata->free_next;
+        my_metadata_t* current_prev = metadata->free_prev;
+        current_next->free_prev = current_next;
+        current_prev->free_next = current_prev;
     }
 }
+// Remove a slot from the slot list depending on conditions.
+void my_remove_from_slot_list(my_metadata_t* metadata) {
+  if (!metadata->slot_prev && !metadata->slot_next) {
+        my_heap.slot_head = NULL;
+        my_heap.slot_tail = NULL;
+    }
+    else if (!metadata->slot_prev) {
+        my_metadata_t* current_next = metadata->slot_next;
+        current_next->slot_prev = NULL;
+        my_heap.slot_head = current_next;
+    }
+    else if (!metadata->slot_next) {
+        my_metadata_t* current_prev = metadata->slot_prev;
+        current_prev->slot_next = NULL;
+        my_heap.slot_tail = current_prev;
+    }
+    else {
+        my_metadata_t* current_next = metadata->slot_next;
+        my_metadata_t* current_prev = metadata->slot_prev;
+        current_next->slot_prev = current_next;
+        current_prev->slot_next = current_prev;
+    }
+}
+
+// Find first free slot after current slot 
+// (in case current slot is not a free slot)
+void* my_find_next_free_slot(my_metadata_t* metadata) {
+    my_metadata_t* current_next = metadata->slot_next;
+    while (current_next) {
+        if (current_next->free_next || current_next == my_heap.free_tail) {
+            return current_next;
+        }
+    }
+    return NULL;
+}
+
+// Find first free slot before current slot 
+// (in case current slot is not a free slot and there were no next free slot)
+void* my_find_prev_free_slot(my_metadata_t* metadata) {
+    my_metadata_t* current_prev = metadata->slot_prev;
+    while (current_prev) {
+        if (current_next->free_prev || current_prev == my_heap.free_head) {
+            return current_prev;
+        }
+    }
+    return NULL;
+}
+
+// Concat two or three neighboring free slots when calling my_free()
+void* my_my_concat_free_slots(my_metadata_t* prev_, my_metadata_t* metadata, my_metadata_t* next_) {
+    my_metadata_t* new_metadata;
+    if (!prev_) {
+        new_metadata = metadata;
+        new_metadata->size = metadata->size + next_->size + sizeof(my_metadata_t);
+    }
+    else if (!next_) {
+        new_metadata = prev_;
+        new_metadata->size = metadata->size + prev_->size + sizeof(my_metadata_t);
+    }
+    else {
+        new_metadata = prev_;
+        new_metadata->size = metadata->size + prev_->size + next_->size + 2*sizeof(my_metadata_t);
+    }
+    return new_metadata;
+}
+
+
+////////////////////// MY MALLOC COMANDS /////////////////////
 
 // This is called only once at the beginning of each challenge.
 void my_initialize() {
   size_t buffer_size = 4096;
   my_metadata_t* metadata = (my_metadata_t*)mmap_from_system(buffer_size);
   metadata->size = buffer_size - sizeof(my_metadata_t);
-  metadata->next = NULL;
-  metadata->prev = NULL;
+  metadata->free_next = NULL;
+  metadata->free_prev = NULL;
+  metadata->slot_next = NULL;
+  metadata->slot_prev = NULL;
   my_heap.free_head = metadata;
   my_heap.free_tail = metadata;
+  my_add_to_free_list(metadata);
+  my_add_to_slot_list(metadata);
 }
 
 // This is called every time an object is allocated. |size| is guaranteed
@@ -344,7 +427,7 @@ void* my_malloc(size_t size) {
   // Check if there are enough free slot size.
   while (metadata && metadata->size < size) {
     prevdata = metadata;
-    metadata = metadata->next;
+    metadata = metadata->free_next;
   }
 
   if (!metadata) {
@@ -359,10 +442,13 @@ void* my_malloc(size_t size) {
     size_t buffer_size = 4096;
     my_metadata_t* metadata = (my_metadata_t*)mmap_from_system(buffer_size);
     metadata->size = buffer_size - sizeof(my_metadata_t);
-    metadata->next = NULL;
-    metadata->prev = prevdata;
+    metadata->free_next = NULL;
+    metadata->slot_next = NULL;
+    metadata->free_prev = prevdata;
+    metadata->slot_prev = my_heap.slot_tail;
     // Add the memory region to the free list.
     my_add_to_free_list(metadata);
+    my_add_to_slot_list(metadata);
     // Now, try my_malloc() again. This should succeed.
     return my_malloc(size);
   }
@@ -371,8 +457,8 @@ void* my_malloc(size_t size) {
   // Try to find minimum region to fit a new object.
   my_metadata_t* mini = metadata;
   size_t mini_size = metadata->size;
-  while (metadata->next){
-    metadata = metadata->next;
+  while (metadata->free_next){
+    metadata = metadata->free_next;
     if (metadata->size > size && metadata->size < mini_size) {
       mini = metadata;
       mini_size = metadata->size;
@@ -387,10 +473,11 @@ void* my_malloc(size_t size) {
   void* ptr = mini + 1;
   size_t remaining_size = mini->size - size;
   mini->size = size;
-  // Remove the free slot from the free list.
+  // Remove the free slot from the (free) list.
   my_remove_from_free_list(mini);
+  my_remove_from_slot_list(mini);
 
-  if (remaining_size > sizeof(simple_metadata_t)) {
+  if (remaining_size > sizeof(my_metadata_t)) {
     // Create a new metadata for the remaining free slot.
     //
     // ... | metadata | object | metadata | free slot | ...
@@ -400,12 +487,15 @@ void* my_malloc(size_t size) {
     //                   size       remaining size
     my_metadata_t* new_metadata = (my_metadata_t*)((char*)ptr + size);
     new_metadata->size = remaining_size - sizeof(my_metadata_t);
-    new_metadata->next = mini->next;
-    new_metadata->prev = mini->prev;
+    new_metadata->free_next = mini->free_next;
+    new_metadata->free_prev = mini->free_prev;
+    new_metadata->slot_next = mini->slot_next;
+    new_metadata->slot_prev = mini->slot_prev;
     // Add the remaining free slot to the free list.
     my_add_to_free_list(new_metadata);
-    mini->next = NULL;
-    mini->prev = NULL;
+    my_add_to_slot_list(new_metadata);
+    mini->free_next = NULL;
+    mini->free_prev = NULL;
   }
   return ptr;
 }
@@ -419,14 +509,65 @@ void my_free(void* ptr) {
   //     ^          ^
   //     metadata   ptr
   my_metadata_t* metadata = (my_metadata_t*)ptr - 1;
-  // Awful result may caused by this part..?
-  // In order to concate free slots, how to find next/prev nodes..?
-  // metadata->next = 
-  // metadata->prev = 
-  // Add the free slot to the free list.
-  my_add_to_free_list(metadata);
-}
+  my_metadata_t* next_slot = metadata->slot_next;
+  my_metadata_t* prev_slot = metadata->slot_prev;
+  my_metadata_t* next_free_slot = my_find_next_free_slot(metadata);
+  my_metadata_t* prev_free_slot;
+  if (next_free_slot) {
+      prev_free_slot = next_free_slot->free_prev;
+  }
+  else {
+      prev_free_slot = my_find_prev_free_slot(metadata);
+  }
 
+  // Check if neighboring slot is next/prev free slot. 
+  bool next_isfree = false;
+  bool prev_isfree = false;
+  if (next_free_slot && next_free_slot == metadata->slot_next) {
+      next_isfree = true;
+  }
+  if (prev_free_slot && prev_free_slot == metadata->slot_prev) {
+      prev_isfree = true;
+  }
+
+  // Concat free slots and remove old free slots
+  if (next_isfree && prev_isfree) {
+      metadata = my_concat_free_slots(prev_free_slot, metadata, next_free_slot);
+      metadata->free_next = next_free_slot->free_next;
+      metadata->free_prev = prev_free_slot->free_prev;
+      metadata->slot_next = next_free_slot->slot_next;
+      metadata->slot_prev = prev_free_slot->slot_prev;
+      my_remove_from_free_list(next_free_slot);
+      my_remove_from_free_list(prev_free_slot);
+      my_remove_from_slot_list(next_free_slot);
+      my_remove_from_slot_list(prev_free_slot);
+  }
+  else if (next_isfree) {
+      metadata = my_concat_free_slots(NULL, metadata, next_free_slot);
+      metadata->free_next = next_free_slot->free_next;
+      metadata->free_prev = prev_free_slot;
+      metadata->slot_next = next_free_slot->slot_next;
+      metadata->slot_prev = prev_slot;
+      my_remove_from_free_list(next_free_slot);
+      my_remove_from_slot_list(next_free_slot);
+  }
+  else if (prev_isfree) {
+      metadata = my_concat_free_slots(prev_free_slot, metadata, NULL);
+      metadata->free_next = next_free_slot;
+      metadata->free_prev = prev_free_slot->free_prev;
+      metadata->slot_next = next_slot;
+      metadata->slot_prev = prev_free_slot->slot_prev;
+      my_remove_from_free_list(prev_free_slot);
+      my_remove_from_slot_list(prev_free_slot);
+  }
+  else {
+      metadata->free_next = next_free_slot;
+      metadata->free_prev = prev_free_slot;
+  }
+  // Add the (free) slot to the (free) list.
+  my_add_to_free_list(metadata);
+  my_add_to_slot_list(metadata);
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 //
