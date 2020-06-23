@@ -369,6 +369,7 @@ void* my_find_next_free_slot(my_metadata_t* metadata) {
         if (current_next->free_next || current_next == my_heap.free_tail) {
             return current_next;
         }
+        current_next = current_next->free_next;
     }
     return NULL;
 }
@@ -381,6 +382,7 @@ void* my_find_prev_free_slot(my_metadata_t* metadata) {
         if (current_prev->free_prev || current_prev == my_heap.free_head) {
             return current_prev;
         }
+        current_prev = current_prev->free_prev;
     }
     return NULL;
 }
@@ -936,7 +938,7 @@ void munmap_to_system(void* ptr, size_t size) {
 int main(int argc, char** argv) {
   srand(12);  // Set the rand seed to make the challenges non-deterministic.
   test();
-  printf('test run done successfully!');
+  printf("test run finished successfully!");
   // run_challenges();
   run_challenge1();
   return 0;
