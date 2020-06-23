@@ -870,6 +870,48 @@ void run_challenges() {
   print_stats("Challenge 5", simple_stats, my_stats);
 }
 
+// Run challenges one by one
+void run_challenge1() {
+  stats_t simple_stats, my_stats;
+  run_challenge(128, 128, simple_initialize, simple_malloc, simple_free);
+  simple_stats = stats;
+  run_challenge(128, 128, my_initialize, my_malloc, my_free);
+  my_stats = stats;
+  print_stats("Challenge 1", simple_stats, my_stats);
+}
+void run_challenge2() {
+  stats_t simple_stats, my_stats;
+  run_challenge(16, 16, simple_initialize, simple_malloc, simple_free);
+  simple_stats = stats;
+  run_challenge(16, 16, my_initialize, my_malloc, my_free);
+  my_stats = stats;
+  print_stats("Challenge 2", simple_stats, my_stats);
+}
+void run_challenge3() {
+  stats_t simple_stats, my_stats;
+  run_challenge(16, 128, simple_initialize, simple_malloc, simple_free);
+  simple_stats = stats;
+  run_challenge(16, 128, my_initialize, my_malloc, my_free);
+  my_stats = stats;
+  print_stats("Challenge 3", simple_stats, my_stats);
+}
+void run_challenge4() {
+  stats_t simple_stats, my_stats;
+  run_challenge(256, 4000, simple_initialize, simple_malloc, simple_free);
+  simple_stats = stats;
+  run_challenge(256, 4000, my_initialize, my_malloc, my_free);
+  my_stats = stats;
+  print_stats("Challenge 4", simple_stats, my_stats);
+}
+void run_challenge5() {
+  stats_t simple_stats, my_stats;
+  run_challenge(8, 4000, simple_initialize, simple_malloc, simple_free);
+  simple_stats = stats;
+  run_challenge(8, 4000, my_initialize, my_malloc, my_free);
+  my_stats = stats;
+  print_stats("Challenge 5", simple_stats, my_stats); 
+}
+
 // Allocate a memory region from the system. |size| needs to be a multiple of
 // 4096 bytes.
 void* mmap_from_system(size_t size) {
@@ -894,6 +936,8 @@ void munmap_to_system(void* ptr, size_t size) {
 int main(int argc, char** argv) {
   srand(12);  // Set the rand seed to make the challenges non-deterministic.
   test();
-  run_challenges();
+  printf('test run done successfully!');
+  // run_challenges();
+  run_challenge1();
   return 0;
 }
