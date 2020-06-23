@@ -1,4 +1,7 @@
 // WORK IN PROGRESS
+// Assertion error; An allocated object is broken!
+// At line 795 (785-798), "Free objects that are expected to be freed in this epoch."
+// 
 
 ////////////////////////////////////////////////////////////////////////////////
 /*                 (๑＞◡＜๑)  Malloc Challenge!!  (◍＞◡＜◍)                   */
@@ -938,8 +941,9 @@ void munmap_to_system(void* ptr, size_t size) {
 int main(int argc, char** argv) {
   srand(12);  // Set the rand seed to make the challenges non-deterministic.
   test();
-  printf("test run finished successfully!");
-  // run_challenges();
+  printf("test run finished successfully!\n");
+  printf("==================================\n");
+  //run_challenges();
   run_challenge1();
   return 0;
 }
