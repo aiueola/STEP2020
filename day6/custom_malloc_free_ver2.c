@@ -1,3 +1,26 @@
+// Just inplemented Best-fit strategy.
+// ==================================
+// Challenge 1: simple malloc => my malloc
+// Time: 25 ms => 1914 ms
+// Utilization: 70% => 70%
+// ==================================
+// Challenge 2: simple malloc => my malloc
+// Time: 22 ms => 1206 ms
+// Utilization: 40% => 39%
+// ==================================
+// Challenge 3: simple malloc => my malloc
+// Time: 277 ms => 23466 ms
+// Utilization: 7% => 10%
+// ==================================
+// Challenge 4: simple malloc => my malloc
+// Time: 40972 ms => 30498 ms
+// Utilization: 16% => 61%
+// ==================================
+// Challenge 5: simple malloc => my malloc
+// Time: 36088 ms => 20348 ms
+// Utilization: 15% => 62%
+// ==================================
+
 ////////////////////////////////////////////////////////////////////////////////
 /*                 (๑＞◡＜๑)  Malloc Challenge!!  (◍＞◡＜◍)                   */
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +268,7 @@ void* my_malloc(size_t size) {
     return simple_malloc(size);
   }
 
+  // Just added this part in order to find "best" (means smallest) free slot to fit in.
   simple_metadata_t* mini = metadata;
   simple_metadata_t* mini_prev = prev;
   size_t mini_size = metadata->size;
