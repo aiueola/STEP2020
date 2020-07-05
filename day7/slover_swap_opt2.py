@@ -30,8 +30,10 @@ def swap_opt(tour, cities, dist):
         updated = False
         for i in range(N-1):
             for j in range(i+3, N):
-                if (i - j) % N > 2:
+                if ((i - j) % N > 3) and ((j - i) % N > 3):
                     change_in_dist = dist[(i-1)%N][j] + dist[j][i+1] + dist[j-1][i] + dist[i][(j+1)%N] - (dist[(i-1)%N][i] + dist[i][i+1] + dist[j-1][j] + dist[j][(j+1)%N])
+                else:
+                    continue
                 if change_in_dist < 0:
                     swap_nodes(tour, i, j)
                     updated = True
