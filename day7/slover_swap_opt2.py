@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# debugging.. somehow swap_opt iteration doesnt finish
 
 import sys
 import math
@@ -22,7 +21,6 @@ def total_dist(tour, dist):
     return sum(dist[tour[i]][tour[(i + 1) % len(tour)]] for i in range(len(tour)))
 
 def swap_opt(tour, cities, dist):
-    # dont know why this iteration goes to infinity
     N = len(tour)
     iteration = 0
     updated = True
@@ -31,7 +29,7 @@ def swap_opt(tour, cities, dist):
         for i in range(N-1):
             for j in range(i+3, N):
                 if ((i - j) % N > 3) and ((j - i) % N > 3):
-                    change_in_dist = dist[(i-1)%N][j] + dist[j][i+1] + dist[j-1][i] + dist[i][(j+1)%N] - (dist[(i-1)%N][i] + dist[i][i+1] + dist[j-1][j] + dist[j][(j+1)%N])
+                    change_in_dist = dist[tour[(i-1)%N]][tour[j]] + dist[tour[j]][tour[i+1]] + dist[tour[j-1]][tour[i]] + dist[tour[i]][tour[(j+1)%N]] - (dist[tour[(i-1)%N]][tour[i]] + dist[tour[i]][tour[i+1]] + dist[tour[j-1]][tour[j]] + dist[tour[j]][tour[(j+1)%N]])
                 else:
                     continue
                 if change_in_dist < 0:
@@ -105,7 +103,7 @@ def solve(cities):
     # 2-opt
     iteration = opt2(tour, cities)
     opt2_time = time.time()
-    print('opt2 done! (iteration={})'.format(iteration), opt2_time - swap_time)
+    print('2-opt done! (iteration={})'.format(iteration), opt2_time - swap_time)
     
     return tour
 
