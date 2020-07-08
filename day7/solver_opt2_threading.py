@@ -37,7 +37,7 @@ def solve_opt2(area_cities, area_tour):
             for j in range(i+2, len(area_tour)):
                 q1 = area_tour[j]
                 if j == len(area_tour)-1:
-                    q2 = 0
+                    q2 = tour[0]
                 else:
                     q2 = area_tour[j+1]
                 if intersect(area_cities[p1], area_cities[p2], area_cities[q1], area_cities[q2]):
@@ -116,7 +116,6 @@ def parallel_processing(file_num):
                 bottom_right.append((cities[i][0], cities[i][1], i))
                 
     # solve each area using threading
-    # ここで返り値の返し方が分からない．
     upper_left_result = []
     upper_right_result = []
     bottom_left_result = []
@@ -128,6 +127,8 @@ def parallel_processing(file_num):
     threads = [thread1, thread2, thread3, thread4]
     for thread in threads:
         thread.start()
+    # somehow this sleep makes runtime a bit faster, maybe need to wait till threads start?
+    time.sleep(3)
     for thread in threads:
         thread.join()
     
