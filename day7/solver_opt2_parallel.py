@@ -55,7 +55,7 @@ def solve(area_cities):
             for j in range(i+2, len(area_tour)):
                 q1 = area_tour[j]
                 if j == len(area_tour)-1:
-                    q2 = 0
+                    q2 = tour[0]
                 else:
                     q2 = area_tour[j+1]
                 if intersect(area_cities[p1], area_cities[p2], area_cities[q1], area_cities[q2]):
