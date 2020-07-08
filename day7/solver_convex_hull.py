@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# debugging.. dont know why there is a wierd point
-# somehow 2-opt is not working
 
 import sys
 import math
@@ -60,7 +58,7 @@ def opt2(tour, cities):
             for j in range(i+2, len(tour)):
                 q1 = tour[j]
                 if j == len(tour)-1:
-                    q2 = 0
+                    q2 = tour[0]
                 else:
                     q2 = tour[j+1]
                 if intersect(cities[p1],cities[p2],cities[q1],cities[q2]):
