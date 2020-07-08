@@ -6,7 +6,6 @@ import time
 import copy
 import random
 import numpy as np
-from scipy import stats
 
 from common import print_tour, read_input, format_tour
 
@@ -16,9 +15,9 @@ def distance(city1, city2):
 
 def calc_prob(change_in_dist, iteration):
     if change_in_dist > 0:
-        return 0.005 - (0.005 / (1 + np.exp(-1 * iteration)))
+        return min(0.001 + 0.9 / (iteration + 1), 0.3)
     else:
-        return 0.995 + (0.005 / (1 + np.exp(-1 * iteration)))
+        return max(0.9 - 0.9 / (iteration + 1), 0.7)
     
 def swap_nodes(swap_node1, swap_node2, tour):
     temp1 = tour[swap_node1]
@@ -56,55 +55,51 @@ def solve(cities):
         current_city = next_city
     greedy_time = time.time()
     print('greedy done!', greedy_time - prep_time)
+    print('iteration={}, total_dist={}'.format(0, total_dist(tour, dist, N)))
     
     # SA
     iteration = 0
-    while iteration < 100000:
+    while iteration < 1000:
+        # swap_opt
         swap_node1 = random.randrange(N)
+        swap_node2 = (swap_node1+1) % N
         #swap_node2 = random.randrange(N)
-        swap_node2 = (swap_node1 + 1) % N
-        if swap_node1 == swap_node2:
-            pass
+        #if swap_node1 == swap_node2:
+        #    pass
         new_tour = copy.copy(tour)
         swap_nodes(swap_node1, swap_node2, new_tour)
         change_in_dist = total_dist(new_tour, dist, N) - total_dist(tour, dist, N)
         prob = calc_prob(change_in_dist, iteration)
-        if stats.bernoulli.rvs(prob, size=1)[0]:
+        if random.random() < prob:
             del tour[:]
             tour = new_tour
         else:
             del new_tour[:]
-        iteration += 1
-        
-    sa_time = time.time()
-    print('SA done! (iteration={})'.format(iteration), sa_time - greedy_time)
-        
-    # 2-opt
-    iteration = 0
-    updated = True
-    while updated:
-        updated = False
+            
+        # 2-opt
         for i in range(len(tour)-2):
             p1 = tour[i]
             p2 = tour[i+1]
             for j in range(i+2, len(tour)):
                 q1 = tour[j]
                 if j == len(tour)-1:
-                    q2 = 0
+                    q2 = tour[0]
                 else:
                     q2 = tour[j+1]
-                if intersect(cities[p1],cities[p2],cities[q1],cities[q2]):
+                if intersect(cities[p1],cities[p2],cities[q1],cities[q2]) and random.random() < calc_prob(-1, iteration):
                     tour[i+1] = q1
                     tour[j]   = p2
                     tour[i+2:j] = reversed(tour[i+2:j])
-                    updated = True
-                    break #if you don't do this, the result would be quite messy.
+                    break
+                    
         iteration += 1
-        if iteration%100 == 0:
-            print('iteration:', iteration)
-            
-    opt2_time = time.time()
-    print('2-opt done! (iteration={})'.format(iteration), opt2_time - sa_time)
+        if iteration < 21:
+            print('iteration={}, total_dist={}'.format(iteration, total_dist(tour, dist, N)))
+        if (iteration % 100 == 0):
+            print('iteration={}, total_dist={}'.format(iteration, total_dist(tour, dist, N)))
+        
+    sa_time = time.time()
+    print('SA done! (iteration={})'.format(iteration), sa_time - greedy_time)
     return tour
     
 if __name__ == '__main__':
